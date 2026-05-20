@@ -55,7 +55,7 @@ QCE Launcher.app
 5. 浏览器入口：
 
 - `http://127.0.0.1:40653/qce-v4-tool/`
-- `http://127.0.0.1:40653/qce-v4-tool/auth?token=qce_mock_token_for_tests`
+- 一键登录链接会在启动日志中打印，同时也会根据 `~/.qq-chat-exporter/security.json` 中的最新 `accessToken` 动态生成
 
 ## 一键安装
 
@@ -86,6 +86,15 @@ curl -fsSL https://raw.githubusercontent.com/sudo-yf/mac-qq-exporter/main/script
 ```bash
 ~/.local/bin/qce start
 ```
+
+这条安装命令已经按干净环境验证过：
+
+- 清空本地 QCE / NapCat 相关目录
+- 只运行 `curl | bash`
+- 自动完成安装
+- 自动启动 QCE
+- `40653` 成功监听
+- `http://127.0.0.1:40653/qce-v4-tool/` 可直接访问
 
 ## CLI
 
