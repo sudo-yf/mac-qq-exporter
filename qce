@@ -1,0 +1,166 @@
+#!/bin/bash
+set -euo pipefail
+
+resolve_script() {
+  local src="$1"
+  while [ -L "$src" ]; do
+    local dir
+    dir="$(cd "$(dirname "$src")" && pwd)"
+    src="$(readlink "$src")"
+    [[ "$src" != /* ]] && src="$dir/$src"
+  done
+  cd "$(dirname "$src")" && pwd
+}
+
+PACK_DIR="$(resolve_script "${BASH_SOURCE[0]}")"
+LAUNCHER_APP="$PACK_DIR/QCE Launcher.app"
+LAUNCHER_BIN="$LAUNCHER_APP/Contents/MacOS/qce-launcher"
+LAUNCHER_SH="$PACK_DIR/launcher-user.sh"
+STANDALONE_SH="$PACK_DIR/start-standalone.sh"
+PREPARE_SH="$PACK_DIR/prepare-local-qq-app.sh"
+PACK_LOG="$PACK_DIR/logs/qce-launcher-app.log"
+SECURITY_JSON="${XDG_STATE_HOME:-$HOME/.qq-chat-exporter}/security.json"
+RUNTIME_APP="${QCE_LOCAL_QQ_APP:-$HOME/Applications/QQ Chat Exporter/QQ-QCE-runtime.app}"
+QCE_URL="http://127.0.0.1:40653/qce-v4-tool/"
+
+read_token() {
+  if [ ! -f "$SECURITY_JSON" ]; then
+    return 1
+  fi
+  python3 - "$SECURITY_JSON" <<'PY'
+import json, sys
+from pathlib import Path
+path = Path(sys.argv[1])
+data = json.loads(path.read_text(encoding="utf-8"))
+token = data.get("accessToken", "").strip()
+if token:
+    print(token)
+PY
+}
+
+open_ui() {
+  local token
+  if token="$(read_token 2>/dev/null)" && [ -n "$token" ]; then
+    open "${QCE_URL}auth?token=$token" >/dev/null 2>&1 || true
+  else
+    open "$QCE_URL" >/dev/null 2>&1 || true
+  fi
+}
+
+is_running() {
+  lsof -nP -iTCP:40653 -sTCP:LISTEN >/dev/null 2>&1
+}
+
+cmd_start() {
+  if is_running; then
+    echo "QCE is already running."
+    open_ui
+    return 0
+  fi
+
+  if [ -x "$LAUNCHER_BIN" ]; then
+    open "$LAUNCHER_APP"
+  elif [ -x "$LAUNCHER_SH" ]; then
+    QCE_QUICK_LOGIN_UIN="${QCE_QUICK_LOGIN_UIN:-2645084731}" "$LAUNCHER_SH"
+    return 0
+  else
+    echo "Launcher not found: $LAUNCHER_APP"
+    return 1
+  fi
+
+  echo "Starting QCE..."
+  for _ in $(seq 1 30); do
+    if is_running; then
+      echo "QCE is ready: $QCE_URL"
+      open_ui
+      return 0
+    fi
+    sleep 1
+  done
+
+  echo "QCE did not become ready within 30 seconds."
+  return 1
+}
+
+cmd_stop() {
+  pkill -f "$RUNTIME_APP/Contents/MacOS/QQ" >/dev/null 2>&1 || true
+  pkill -f "$PACK_DIR/.qce-app-launch.sh" >/dev/null 2>&1 || true
+  echo "Stop signal sent."
+}
+
+cmd_status() {
+  echo "Pack dir: $PACK_DIR"
+  echo "Runtime app: $RUNTIME_APP"
+  if is_running; then
+    echo "Status: running"
+    echo "URL: $QCE_URL"
+    if lsof -nP -iTCP:40653 -sTCP:LISTEN 2>/dev/null; then
+      true
+    fi
+  else
+    echo "Status: stopped"
+  fi
+}
+
+cmd_logs() {
+  mkdir -p "$(dirname "$PACK_LOG")"
+  touch "$PACK_LOG"
+  tail -n 200 -f "$PACK_LOG"
+}
+
+cmd_rebuild() {
+  cmd_stop
+  rm -rf "$RUNTIME_APP"
+  echo "Removed runtime app: $RUNTIME_APP"
+}
+
+cmd_prepare() {
+  "$PREPARE_SH"
+}
+
+cmd_standalone() {
+  exec "$STANDALONE_SH"
+}
+
+cmd_path() {
+  echo "$PACK_DIR"
+}
+
+usage() {
+  cat <<EOF
+Usage: qce <command>
+
+Commands:
+  start       Start QCE and open the web UI
+  stop        Stop the runtime QQ/QCE process
+  open        Open the QCE web UI in the browser
+  status      Show current status
+  logs        Tail launcher logs
+  rebuild     Remove the local QQ runtime app
+  prepare     Prepare the local QQ runtime app only
+  standalone  Run standalone viewer mode
+  path        Print install path
+  help        Show this help
+EOF
+}
+
+cmd="${1:-help}"
+shift || true
+
+case "$cmd" in
+  start) cmd_start "$@" ;;
+  stop) cmd_stop "$@" ;;
+  open) open_ui ;;
+  status) cmd_status ;;
+  logs) cmd_logs ;;
+  rebuild) cmd_rebuild ;;
+  prepare) cmd_prepare ;;
+  standalone) cmd_standalone "$@" ;;
+  path) cmd_path ;;
+  help|-h|--help) usage ;;
+  *)
+    echo "Unknown command: $cmd" >&2
+    usage >&2
+    exit 1
+    ;;
+esac

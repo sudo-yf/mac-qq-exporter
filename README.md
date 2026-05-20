@@ -57,6 +57,45 @@ QCE Launcher.app
 - `http://127.0.0.1:40653/qce-v4-tool/`
 - `http://127.0.0.1:40653/qce-v4-tool/auth?token=qce_mock_token_for_tests`
 
+## 一键安装
+
+如果你当前就是这个私有仓库的拥有者，或者本机已经 `gh auth login` 过，可以直接执行：
+
+```bash
+curl -fsSL -H "Authorization: Bearer $(gh auth token)" \
+  -H "Accept: application/vnd.github.raw" \
+  https://api.github.com/repos/sudo-yf/mac-qq-exporter/contents/scripts/install.sh | bash
+```
+
+安装脚本会：
+
+- 下载仓库当前 `main` 分支内容
+- 安装到 `~/Applications/QQ Chat Exporter/NapCat-QCE-macOS-arm64`
+- 创建 CLI：`~/.local/bin/qce`
+- 创建 App 链接：`~/Applications/QCE Launcher.app`
+
+如果后续把仓库改成公开仓库，可以直接简化成：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/sudo-yf/mac-qq-exporter/main/scripts/install.sh | bash
+```
+
+## CLI
+
+安装后可用命令：
+
+```bash
+qce start
+qce stop
+qce open
+qce status
+qce logs
+qce rebuild
+qce prepare
+qce standalone
+qce path
+```
+
 ## 启动方式
 
 ### 1. 双击启动
@@ -77,6 +116,12 @@ QCE Launcher.app
 
 ```bash
 QCE_QUICK_LOGIN_UIN=2645084731 ./launcher-user.sh
+```
+
+或者直接：
+
+```bash
+qce start
 ```
 
 ### 3. 独立浏览模式
