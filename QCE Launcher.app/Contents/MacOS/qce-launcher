@@ -17,6 +17,8 @@ fi
 LOG_DIR="$PACK_DIR/logs"
 mkdir -p "$LOG_DIR"
 LOG_FILE="$LOG_DIR/qce-launcher-app.log"
+SECURITY_JSON="${XDG_STATE_HOME:-$HOME/.qq-chat-exporter}/security.json"
+QCE_URL="http://127.0.0.1:40653/qce-v4-tool/"
 RUN_SCRIPT="$PACK_DIR/.qce-app-launch.sh"
 cat > "$RUN_SCRIPT" <<EOF
 #!/bin/bash
@@ -27,6 +29,23 @@ exec "$PACK_DIR/launcher-user.sh" >>"$LOG_FILE" 2>&1
 EOF
 chmod +x "$RUN_SCRIPT"
 
+read_token() {
+  if [ ! -f "$SECURITY_JSON" ]; then
+    return 1
+  fi
+  python3 - "$SECURITY_JSON" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+data = json.loads(path.read_text(encoding="utf-8"))
+token = data.get("accessToken", "").strip()
+if token:
+    print(token)
+PY
+}
+
 /usr/bin/osascript <<EOF
 tell application "Terminal"
   activate
@@ -35,9 +54,14 @@ end tell
 EOF
 
 (
-  for _ in $(seq 1 30); do
-    if /usr/bin/curl -sf "http://127.0.0.1:40653/qce-v4-tool/auth?token=qce_mock_token_for_tests" >/dev/null 2>&1; then
-      /usr/bin/open "http://127.0.0.1:40653/qce-v4-tool/auth?token=qce_mock_token_for_tests" >/dev/null 2>&1 || true
+  for _ in $(seq 1 90); do
+    if /usr/bin/curl -sf "$QCE_URL" >/dev/null 2>&1; then
+      TOKEN="$(read_token 2>/dev/null || true)"
+      if [ -n "$TOKEN" ]; then
+        /usr/bin/open "${QCE_URL}auth?token=$TOKEN" >/dev/null 2>&1 || true
+      else
+        /usr/bin/open "$QCE_URL" >/dev/null 2>&1 || true
+      fi
       exit 0
     fi
     sleep 1

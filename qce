@@ -1,18 +1,22 @@
 #!/bin/bash
 set -euo pipefail
 
-resolve_script() {
-  local src="$1"
-  while [ -L "$src" ]; do
-    local dir
-    dir="$(cd "$(dirname "$src")" && pwd)"
-    src="$(readlink "$src")"
-    [[ "$src" != /* ]] && src="$dir/$src"
-  done
-  cd "$(dirname "$src")" && pwd
+resolve_script_file() {
+  python3 - "$1" <<'PY'
+import os
+import sys
+
+print(os.path.realpath(sys.argv[1]))
+PY
 }
 
-PACK_DIR="$(resolve_script "${BASH_SOURCE[0]}")"
+SCRIPT_PATH="$(resolve_script_file "${BASH_SOURCE[0]}")"
+PACK_DIR="$(cd "$(dirname "$SCRIPT_PATH")" && pwd)"
+DEFAULT_PACK_DIR="$HOME/Applications/QQ Chat Exporter/NapCat-QCE-macOS-arm64"
+
+if [ ! -x "$PACK_DIR/launcher-user.sh" ] && [ -x "$DEFAULT_PACK_DIR/launcher-user.sh" ]; then
+  PACK_DIR="$DEFAULT_PACK_DIR"
+fi
 LAUNCHER_APP="$PACK_DIR/QCE Launcher.app"
 LAUNCHER_BIN="$LAUNCHER_APP/Contents/MacOS/qce-launcher"
 LAUNCHER_SH="$PACK_DIR/launcher-user.sh"
@@ -69,7 +73,7 @@ cmd_start() {
   fi
 
   echo "Starting QCE..."
-  for _ in $(seq 1 30); do
+  for _ in $(seq 1 90); do
     if is_running; then
       echo "QCE is ready: $QCE_URL"
       open_ui
@@ -78,7 +82,7 @@ cmd_start() {
     sleep 1
   done
 
-  echo "QCE did not become ready within 30 seconds."
+  echo "QCE did not become ready within 90 seconds."
   return 1
 }
 
