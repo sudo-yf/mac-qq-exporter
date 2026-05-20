@@ -24,7 +24,7 @@ cat > "$RUN_SCRIPT" <<EOF
 #!/bin/bash
 set -euo pipefail
 cd "$PACK_DIR"
-export QCE_QUICK_LOGIN_UIN="\${QCE_QUICK_LOGIN_UIN:-2645084731}"
+export QCE_QUICK_LOGIN_UIN="\${QCE_QUICK_LOGIN_UIN:-}"
 exec "$PACK_DIR/launcher-user.sh" >>"$LOG_FILE" 2>&1
 EOF
 chmod +x "$RUN_SCRIPT"

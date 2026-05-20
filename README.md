@@ -56,6 +56,7 @@ QCE Launcher.app
 
 - `http://127.0.0.1:40653/qce-v4-tool/`
 - 一键登录链接会在启动日志中打印，同时也会根据 `~/.qq-chat-exporter/security.json` 中的最新 `accessToken` 动态生成
+- 如果是首次使用，没有可复用登录态时，按 QQ 正常登录 / 扫码流程完成登录即可
 
 ## 一键安装
 
@@ -81,7 +82,9 @@ curl -fsSL -H "Authorization: Bearer $(gh auth token)" \
 curl -fsSL https://raw.githubusercontent.com/sudo-yf/mac-qq-exporter/main/scripts/install.sh | bash
 ```
 
-执行成功后，目标是**一条命令完成安装并启动**。如果自动启动失败，安装器会明确提示你再手动执行一次：
+执行成功后，目标是**一条命令完成安装并启动**。首次使用不再依赖任何特定 QQ 账号；如果本机已有可复用登录态，NapCat 会尽量复用，否则会进入正常登录 / 扫码流程。
+
+如果自动启动失败，安装器会明确提示你再手动执行一次：
 
 ```bash
 ~/.local/bin/qce start
@@ -131,13 +134,19 @@ qce path
 如果你想手动看日志：
 
 ```bash
-QCE_QUICK_LOGIN_UIN=2645084731 ./launcher-user.sh
+./launcher-user.sh
 ```
 
 或者直接：
 
 ```bash
 qce start
+```
+
+如果你自己明确知道要指定某个 QQ 号做快速登录，可以手动传：
+
+```bash
+QCE_QUICK_LOGIN_UIN=<你的QQ号> ./launcher-user.sh
 ```
 
 ### 3. 独立浏览模式

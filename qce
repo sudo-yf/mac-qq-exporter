@@ -65,7 +65,7 @@ cmd_start() {
   if [ -x "$LAUNCHER_BIN" ]; then
     open "$LAUNCHER_APP"
   elif [ -x "$LAUNCHER_SH" ]; then
-    QCE_QUICK_LOGIN_UIN="${QCE_QUICK_LOGIN_UIN:-2645084731}" "$LAUNCHER_SH"
+    QCE_QUICK_LOGIN_UIN="${QCE_QUICK_LOGIN_UIN:-}" "$LAUNCHER_SH"
     return 0
   else
     echo "Launcher not found: $LAUNCHER_APP"
