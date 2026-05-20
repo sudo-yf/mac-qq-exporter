@@ -1,0 +1,47 @@
+#!/bin/bash
+set -euo pipefail
+
+APP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
+PACK_DIR="$( cd "$APP_DIR/.." && pwd )"
+PACK_DIR="$( cd "$PACK_DIR/.." && pwd )"
+
+cd "$PACK_DIR"
+
+/usr/bin/xattr -r -d com.apple.quarantine "$PACK_DIR" >/dev/null 2>&1 || true
+
+if [ ! -x "$PACK_DIR/launcher-user.sh" ]; then
+  /usr/bin/osascript -e 'display alert "QCE Launcher" message "launcher-user.sh 不存在，无法启动。" as critical'
+  exit 1
+fi
+
+LOG_DIR="$PACK_DIR/logs"
+mkdir -p "$LOG_DIR"
+LOG_FILE="$LOG_DIR/qce-launcher-app.log"
+RUN_SCRIPT="$PACK_DIR/.qce-app-launch.sh"
+cat > "$RUN_SCRIPT" <<EOF
+#!/bin/bash
+set -euo pipefail
+cd "$PACK_DIR"
+export QCE_QUICK_LOGIN_UIN="\${QCE_QUICK_LOGIN_UIN:-2645084731}"
+exec "$PACK_DIR/launcher-user.sh" >>"$LOG_FILE" 2>&1
+EOF
+chmod +x "$RUN_SCRIPT"
+
+/usr/bin/osascript <<EOF
+tell application "Terminal"
+  activate
+  do script "bash '$RUN_SCRIPT'"
+end tell
+EOF
+
+(
+  for _ in $(seq 1 30); do
+    if /usr/bin/curl -sf "http://127.0.0.1:40653/qce-v4-tool/auth?token=qce_mock_token_for_tests" >/dev/null 2>&1; then
+      /usr/bin/open "http://127.0.0.1:40653/qce-v4-tool/auth?token=qce_mock_token_for_tests" >/dev/null 2>&1 || true
+      exit 0
+    fi
+    sleep 1
+  done
+) >/dev/null 2>&1 &
+
+exit 0

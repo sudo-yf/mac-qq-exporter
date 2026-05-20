@@ -1,0 +1,41 @@
+1:"$Sreact.fragment"
+3:I[33009,["/static/qce-v4-tool/_next/static/chunks/539123e280f8ace6.js","/static/qce-v4-tool/_next/static/chunks/c1b055bd03cd5f7e.js","/static/qce-v4-tool/_next/static/chunks/438bc6b836091c6d.js"],"AuthProvider"]
+4:I[81323,["/static/qce-v4-tool/_next/static/chunks/539123e280f8ace6.js","/static/qce-v4-tool/_next/static/chunks/c1b055bd03cd5f7e.js","/static/qce-v4-tool/_next/static/chunks/438bc6b836091c6d.js"],"LoadingProvider"]
+5:I[44767,["/static/qce-v4-tool/_next/static/chunks/4eedaec91dba8688.js","/static/qce-v4-tool/_next/static/chunks/8caf5fc2307396ea.js"],"default"]
+6:I[17954,["/static/qce-v4-tool/_next/static/chunks/539123e280f8ace6.js","/static/qce-v4-tool/_next/static/chunks/c1b055bd03cd5f7e.js","/static/qce-v4-tool/_next/static/chunks/438bc6b836091c6d.js","/static/qce-v4-tool/_next/static/chunks/4139f008144ba11b.js"],"default"]
+7:I[60866,["/static/qce-v4-tool/_next/static/chunks/4eedaec91dba8688.js","/static/qce-v4-tool/_next/static/chunks/8caf5fc2307396ea.js"],"default"]
+8:I[46892,["/static/qce-v4-tool/_next/static/chunks/539123e280f8ace6.js","/static/qce-v4-tool/_next/static/chunks/c1b055bd03cd5f7e.js","/static/qce-v4-tool/_next/static/chunks/438bc6b836091c6d.js","/static/qce-v4-tool/_next/static/chunks/237f024d5b0267a7.js"],"default"]
+9:I[60199,["/static/qce-v4-tool/_next/static/chunks/539123e280f8ace6.js","/static/qce-v4-tool/_next/static/chunks/c1b055bd03cd5f7e.js","/static/qce-v4-tool/_next/static/chunks/438bc6b836091c6d.js"],"Toaster"]
+a:I[86598,["/static/qce-v4-tool/_next/static/chunks/539123e280f8ace6.js","/static/qce-v4-tool/_next/static/chunks/c1b055bd03cd5f7e.js","/static/qce-v4-tool/_next/static/chunks/438bc6b836091c6d.js"],"Analytics"]
+:HL["/static/qce-v4-tool/_next/static/chunks/b3d6375572682623.css","style"]
+:HL["/static/qce-v4-tool/_next/static/chunks/3525ddbaa3edfd00.css","style"]
+2:T559,
+              (function() {
+                try {
+                  var theme = localStorage.getItem('theme');
+                  if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
+                  }
+                } catch (e) {}
+              })();
+              
+              // 修复浏览器翻译功能(Edge/Chrome等)导致的 React DOM 操作错误
+              // 当翻译功能修改DOM后，React尝试操作已被移除的节点会抛出错误
+              if (typeof Node !== 'undefined') {
+                var originalRemoveChild = Node.prototype.removeChild;
+                Node.prototype.removeChild = function(child) {
+                  if (child.parentNode !== this) {
+                    return child;
+                  }
+                  return originalRemoveChild.apply(this, arguments);
+                };
+                
+                var originalInsertBefore = Node.prototype.insertBefore;
+                Node.prototype.insertBefore = function(newNode, referenceNode) {
+                  if (referenceNode && referenceNode.parentNode !== this) {
+                    return newNode;
+                  }
+                  return originalInsertBefore.apply(this, arguments);
+                };
+              }
+            0:{"buildId":"QO3-kk_6jN9PLvB_1iGCd","rsc":["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/static/qce-v4-tool/_next/static/chunks/b3d6375572682623.css","precedence":"next"}],["$","link","1",{"rel":"stylesheet","href":"/static/qce-v4-tool/_next/static/chunks/3525ddbaa3edfd00.css","precedence":"next"}],["$","script","script-0",{"src":"/static/qce-v4-tool/_next/static/chunks/539123e280f8ace6.js","async":true}],["$","script","script-1",{"src":"/static/qce-v4-tool/_next/static/chunks/c1b055bd03cd5f7e.js","async":true}],["$","script","script-2",{"src":"/static/qce-v4-tool/_next/static/chunks/438bc6b836091c6d.js","async":true}]],["$","html",null,{"lang":"zh-CN","translate":"no","suppressHydrationWarning":true,"children":[["$","head",null,{"children":["$","script",null,{"dangerouslySetInnerHTML":{"__html":"$2"}}]}],["$","body",null,{"className":"font-sans geistsans_d5a4f12f-module__Y4EhjW__variable geistmono_157ca88a-module__d8gXIa__variable","suppressHydrationWarning":true,"children":[["$","$L3",null,{"children":["$","$L4",null,{"children":[["$","$L5",null,{"parallelRouterKey":"children","error":"$6","errorStyles":[],"errorScripts":[["$","script","script-0",{"src":"/static/qce-v4-tool/_next/static/chunks/4139f008144ba11b.js","async":true}]],"template":["$","$L7",null,{}],"notFound":[["$","$L8",null,{}],[]]}],["$","$L9",null,{"position":"bottom-right","theme":"macos"}]]}]}],["$","$La",null,{}]]}]]}]]}],"loading":[null,[],[]],"isPartial":false}
