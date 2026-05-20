@@ -100,4 +100,8 @@ echo "Starting QCE automatically..."
 }
 
 echo
-echo "QCE install + start completed."
+if [ -f "$HOME/Desktop/QCE-Login-QRCode.png" ]; then
+  echo "QCE install completed. Scan the QR code on your Desktop to finish QQ login."
+else
+  echo "QCE install + start completed."
+fi

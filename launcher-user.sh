@@ -241,6 +241,55 @@ ensure_macos_native_addons_signed
 
 export NAPCAT_WORKDIR="$SCRIPT_DIR"
 
+start_qr_code_helper() {
+    local qr_path="$SCRIPT_DIR/cache/qrcode.png"
+    local desktop_qr="$HOME/Desktop/QCE-Login-QRCode.png"
+    local qr_server="$SCRIPT_DIR/scripts/qr-login-server.py"
+    local qr_server_port="${QCE_QR_SERVER_PORT:-40654}"
+    local security_json="${XDG_STATE_HOME:-$HOME/.qq-chat-exporter}/security.json"
+
+    mkdir -p "$SCRIPT_DIR/cache"
+    rm -f "$qr_path" "$desktop_qr" >/dev/null 2>&1 || true
+
+    (
+        local last_mtime=""
+        for _ in $(seq 1 600); do
+            if [ -f "$qr_path" ]; then
+                local mtime=""
+                mtime="$(stat -f %m "$qr_path" 2>/dev/null || true)"
+                if [ -n "$mtime" ] && [ "$mtime" != "$last_mtime" ]; then
+                    last_mtime="$mtime"
+                    cp -f "$qr_path" "$desktop_qr" >/dev/null 2>&1 || true
+                    pkill -f "$qr_server --host 127.0.0.1 --port $qr_server_port" >/dev/null 2>&1 || true
+                    if [ -f "$qr_server" ]; then
+                        python3 "$qr_server" \
+                            --host 127.0.0.1 \
+                            --port "$qr_server_port" \
+                            --qr-path "$qr_path" \
+                            --qce-base "http://127.0.0.1:40653/qce-v4-tool/" \
+                            --security-json "$security_json" \
+                            >/dev/null 2>&1 &
+                        sleep 1
+                        open "http://127.0.0.1:${qr_server_port}/login" >/dev/null 2>&1 || true
+                        echo "[Info] QR login page opened: http://127.0.0.1:${qr_server_port}/login"
+                    elif [ -f "$desktop_qr" ]; then
+                        open "$desktop_qr" >/dev/null 2>&1 || true
+                        echo "[Info] QR code copied to Desktop: $desktop_qr"
+                    else
+                        open "$qr_path" >/dev/null 2>&1 || true
+                        echo "[Info] QR code opened: $qr_path"
+                    fi
+                fi
+            fi
+            sleep 1
+        done
+    ) &
+}
+
+if [[ "${OSTYPE:-}" == darwin* ]]; then
+    start_qr_code_helper
+fi
+
 echo "Starting NapCat + QCE..."
 echo "Press Ctrl+C to stop."
 echo "After QQ login, open http://localhost:40653/qce-v4-tool/ in your browser."

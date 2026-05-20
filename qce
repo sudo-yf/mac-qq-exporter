@@ -26,6 +26,8 @@ PACK_LOG="$PACK_DIR/logs/qce-launcher-app.log"
 SECURITY_JSON="${XDG_STATE_HOME:-$HOME/.qq-chat-exporter}/security.json"
 RUNTIME_APP="${QCE_LOCAL_QQ_APP:-$HOME/Applications/QQ Chat Exporter/QQ-QCE-runtime.app}"
 QCE_URL="http://127.0.0.1:40653/qce-v4-tool/"
+QR_CODE_PATH="$PACK_DIR/cache/qrcode.png"
+DESKTOP_QR_PATH="$HOME/Desktop/QCE-Login-QRCode.png"
 
 read_token() {
   if [ ! -f "$SECURITY_JSON" ]; then
@@ -55,6 +57,14 @@ is_running() {
   lsof -nP -iTCP:40653 -sTCP:LISTEN >/dev/null 2>&1
 }
 
+is_qq_runtime_running() {
+  ps -ef | grep -F "$RUNTIME_APP/Contents/MacOS/QQ" | grep -v grep >/dev/null 2>&1
+}
+
+is_waiting_for_qr_login() {
+  { [ -f "$QR_CODE_PATH" ] || [ -f "$DESKTOP_QR_PATH" ]; } && is_qq_runtime_running
+}
+
 cmd_start() {
   if is_running; then
     echo "QCE is already running."
@@ -73,16 +83,25 @@ cmd_start() {
   fi
 
   echo "Starting QCE..."
-  for _ in $(seq 1 90); do
+  for _ in $(seq 1 120); do
     if is_running; then
       echo "QCE is ready: $QCE_URL"
       open_ui
       return 0
     fi
+    if is_waiting_for_qr_login; then
+      echo "QCE is waiting for QQ login."
+      if [ -f "$DESKTOP_QR_PATH" ]; then
+        echo "Scan the QR code on your Desktop: $DESKTOP_QR_PATH"
+      else
+        echo "Scan the QR code at: $QR_CODE_PATH"
+      fi
+      return 0
+    fi
     sleep 1
   done
 
-  echo "QCE did not become ready within 90 seconds."
+  echo "QCE did not become ready within 120 seconds."
   return 1
 }
 

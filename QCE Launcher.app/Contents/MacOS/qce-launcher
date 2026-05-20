@@ -54,7 +54,7 @@ end tell
 EOF
 
 (
-  for _ in $(seq 1 90); do
+  for _ in $(seq 1 600); do
     if /usr/bin/curl -sf "$QCE_URL" >/dev/null 2>&1; then
       TOKEN="$(read_token 2>/dev/null || true)"
       if [ -n "$TOKEN" ]; then
