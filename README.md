@@ -73,11 +73,18 @@ curl -fsSL -H "Authorization: Bearer $(gh auth token)" \
 - 安装到 `~/Applications/QQ Chat Exporter/NapCat-QCE-macOS-arm64`
 - 创建 CLI：`~/.local/bin/qce`
 - 创建 App 链接：`~/Applications/QCE Launcher.app`
+- 在检测到 `/Applications/QQ.app` 后自动执行 `qce start`
 
 如果后续把仓库改成公开仓库，可以直接简化成：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/sudo-yf/mac-qq-exporter/main/scripts/install.sh | bash
+```
+
+执行成功后，目标是**一条命令完成安装并启动**。如果自动启动失败，安装器会明确提示你再手动执行一次：
+
+```bash
+~/.local/bin/qce start
 ```
 
 ## CLI

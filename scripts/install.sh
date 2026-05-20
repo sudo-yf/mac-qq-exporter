@@ -74,14 +74,30 @@ echo "Installed to: $INSTALL_DIR"
 echo "CLI link: $BIN_DIR/qce"
 echo "App link: $APP_LINK_DIR/QCE Launcher.app"
 echo
-echo "Next steps:"
-echo "  1. Ensure QQ.app is installed in /Applications/QQ.app"
-echo "  2. Run: qce start"
-echo "  3. Or double-click: $APP_LINK_DIR/QCE Launcher.app"
-echo
 if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
   echo "Note: $BIN_DIR is not currently in PATH."
   echo "Add this to your shell profile if you want to run 'qce' directly:"
   echo "  export PATH=\"$BIN_DIR:\$PATH\""
   echo
 fi
+
+if [ ! -d "/Applications/QQ.app" ]; then
+  echo "QQ.app not found in /Applications/QQ.app."
+  echo "Install official QQ first, then run:"
+  echo "  $BIN_DIR/qce start"
+  exit 0
+fi
+
+echo "Starting QCE automatically..."
+"$INSTALL_DIR/qce" start || {
+  echo
+  echo "Install completed, but auto-start did not finish successfully."
+  echo "You can retry manually with:"
+  echo "  $BIN_DIR/qce start"
+  echo "Or double-click:"
+  echo "  $APP_LINK_DIR/QCE Launcher.app"
+  exit 1
+}
+
+echo
+echo "QCE install + start completed."
